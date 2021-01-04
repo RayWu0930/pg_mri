@@ -148,6 +148,11 @@ class DataTransform:
         zf = transforms.ifft2(masked_kspace)
         # Take complex abs to get a real image
         zf = transforms.complex_abs(zf)
+        
+        if fname == 'FashionMNIST':
+            zf = torch.stack((zf, torch.zeros_like(zf)), axis=0)
+            return kspace, masked_kspace, mask, zf, target, 0, 1, fname, slice
+        
         # Normalize input
         zf, zf_mean, zf_std = transforms.normalize_instance(zf, eps=1e-11)
         zf = zf.clamp(-6, 6)
@@ -156,8 +161,6 @@ class DataTransform:
         # target = transforms.normalize(target, mean, std, eps=1e-11)
         target, gt_mean, gt_std = transforms.normalize_instance(target, eps=1e-11)
         target = target.clamp(-6, 6)
-        if fname == 'FashionMNIST':
-            zf = torch.stack((zf, torch.zeros_like(zf)), axis=0)
 
         # Need to return kspace and mask information when doing active learning, since we are
         # acquiring frequencies and updating the mask for a data point during an AL loop.
@@ -237,7 +240,7 @@ class MaskFunc:
         mask_shape = [1 for _ in shape]
         mask_shape[-2] = num_cols
         mask = torch.from_numpy(mask.reshape(*mask_shape).astype(np.float32))
-
+        
         return mask
 
 

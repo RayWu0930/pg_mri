@@ -297,7 +297,7 @@ def create_arg_parser():
                         help='Path to the dataset')
     parser.add_argument('--sample_rate', type=float, default=1.,
                         help='Fraction of total volumes to include')
-    parser.add_argument('--accelerations', nargs='+', default=[4, 4, 4, 6, 6, 8], type=int,
+    parser.add_argument('--accelerations', nargs='+', default=[4, 4, 4, 6, 6, 8], type=float,
                         help='Ratio of k-space columns to be sampled. If multiple values are '
                         'provided, then one of those is chosen uniformly at random for each volume.')
     parser.add_argument('--center_fractions', nargs='+', default=[0.25, 0.167, 0.125, 0.167, 0.125, 0.125], type=float,
