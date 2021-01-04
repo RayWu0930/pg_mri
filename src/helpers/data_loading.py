@@ -242,13 +242,13 @@ class MaskFunc:
 def create_fastmri_dataset(args, partition):
     # TODO: How to make this less hardcoded?
     if partition == 'train':
-        path = args.data_path / f'singlecoil_train'
+        path = args.data_path / f'knee_singlecoil_train'
         use_seed = False
     elif partition == 'val':
-        path = args.data_path / f'singlecoil_val'
+        path = args.data_path / f'knee_singlecoil_val'
         use_seed = True
     elif partition == 'test':
-        path = args.data_path / f'singlecoil_test'
+        path = args.data_path / f'knee_singlecoil_test'
         use_seed = True
     else:
         raise ValueError(f"partition should be in ['train', 'val', 'test'], not {partition}")
@@ -268,9 +268,60 @@ def create_fastmri_dataset(args, partition):
 
     return dataset
 
-
+'''
 def create_data_loader(args, partition, shuffle=False, display=False):
     dataset = create_fastmri_dataset(args, partition)
+
+    if partition.lower() == 'train':
+        batch_size = args.batch_size
+        if not shuffle:
+            warnings.warn("Currently not shuffling training data! Pass shuffle=True to "
+                          "create_data_loader() to shuffle.")
+    elif partition.lower() in ['val', 'test']:
+        batch_size = args.val_batch_size
+        if display:
+            dataset = [dataset[i] for i in range(0, len(dataset), len(dataset) // 16)]
+    else:
+        raise ValueError(f"'partition' should be in ('train', 'val', 'test'), not {partition}")
+
+    loader = DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=args.num_workers,
+        pin_memory=True,
+    )
+    return loader
+'''
+
+def create_fashion_mnist_dataset(args, partition):
+    from .fashion_mnist import FashionMNISTData
+    
+    mask = MaskFunc(args.center_fractions, args.accelerations)
+    
+    if partition == 'test':
+        dataset = FashionMNISTData(root=args.data_path,
+                                   transform=DataTransform(mask, args.resolution, use_seed=True),
+                                   custom_split='test')
+    else:
+        # TODO: slightly different from fastmri, where use_seed for val is True
+        train_val_set = FashionMNISTData(root=args.data_path,
+                                         transform=DataTransform(mask, args.resolution, use_seed=False),
+                                         custom_split='train')
+        val_set_size = int(len(train_val_set)/4)
+        train_set_size = len(train_val_set) - val_set_size
+        train_set, val_set = torch.utils.data.random_split(train_val_set, [train_set_size, val_set_size], generator=torch.Generator().manual_seed(42))
+        if partition == 'train':
+            dataset = train_set
+        elif partition == 'val':
+            dataset = val_set
+        else:
+            raise ValueError(f"partition should be in ['train', 'val', 'test'], not {partition}")
+
+    return dataset
+
+def create_data_loader(args, partition, shuffle=False, display=False):
+    dataset = create_fashion_mnist_dataset(args, partition)
 
     if partition.lower() == 'train':
         batch_size = args.batch_size
