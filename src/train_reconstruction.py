@@ -305,7 +305,7 @@ def create_arg_parser():
                         'have the same length as accelerations')
     parser.add_argument('--num_pools', type=int, default=4, help='Number of U-Net pooling layers')
     parser.add_argument('--drop_prob', type=float, default=0, help='Dropout probability')  # 0.2 in Kendall&Gal
-    parser.add_argument('--num_chans', type=int, default=16, help='Number of U-Net channels')
+    parser.add_argument('--num_chans', type=int, default=64, help='Number of U-Net channels')
     parser.add_argument('--val_batch_size', default=64, type=int, help='Mini batch size for validation')
     parser.add_argument('--batch_size', default=16, type=int, help='Mini batch size')
     parser.add_argument('--num_epochs', type=int, default=50, help='Number of training epochs')
