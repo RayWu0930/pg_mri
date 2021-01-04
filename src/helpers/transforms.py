@@ -66,7 +66,8 @@ def fft2(data):
     """
     assert data.size(-1) == 2
     data = ifftshift(data, dim=(-3, -2))
-    data = torch.fft(data, 2, normalized=True)
+    # data = data.fft(2, normalized=True) # the next line is equivalent but shows no warning
+    data = torch.view_as_real(torch.fft.fftn(torch.view_as_complex(data), dim=(-2,-1)))
     data = fftshift(data, dim=(-3, -2))
     return data
 
@@ -85,7 +86,8 @@ def ifft2(data):
     """
     assert data.size(-1) == 2
     data = ifftshift(data, dim=(-3, -2))
-    data = torch.ifft(data, 2, normalized=True)
+    # data = data.ifft(2, normalized=True) # the next line is equivalent but shows no warning
+    data = torch.view_as_real(torch.fft.ifftn(torch.view_as_complex(data), dim=(-2,-1)))
     data = fftshift(data, dim=(-3, -2))
     return data
 
@@ -259,7 +261,8 @@ def rfft2(data):
             (len(data.shape) == 3 and data.shape[0] == 1) or
             (len(data.shape) == 4 and data.shape[1] == 1))
     data = ifftshift(data, dim=(-2, -1))
-    data = torch.rfft(data, 2, normalized=True, onesided=False)
+    # data = torch.rfft(data, 2, normalized=True, onesided=False) # the next line is equivalent but shows no warning (not rfftn because rfftn only shows the half of the kspace by conjugate symmetry)
+    data = torch.view_as_real(torch.fft.fftn(data, dim=(-2,-1)))
     # Now complex valued with dim -1 as [real, imaginary] dimension
     data = fftshift(data, dim=(-3, -2))
     return data

@@ -51,7 +51,7 @@ def train_epoch(args, epoch, model, data_loader, optimizer, writer):
     global_step = epoch * len(data_loader)
     for iter, data in enumerate(data_loader):
         _, _, _, input, target, _, _, _, _ = data
-        input = input.unsqueeze(1).to(args.device)
+        input = input.to(args.device)
         target = target.to(args.device)
 
         optimizer.zero_grad()
@@ -94,7 +94,7 @@ def evaluate_loss(args, epoch, model, data_loader, writer):
     with torch.no_grad():
         for iter, data in enumerate(data_loader):
             _, _, _, input, target, _, _, _, _ = data
-            input = input.unsqueeze(1).to(args.device)
+            input = input.to(args.device)
             target = target.to(args.device)
 
             recon = model(input).squeeze(1)
@@ -127,7 +127,7 @@ def visualize(args, epoch, model, data_loader, writer):
     with torch.no_grad():
         for iter, data in enumerate(data_loader):
             _, _, _, input, target, _, _, _, _ = data
-            input = input.unsqueeze(1).to(args.device)
+            input = input.to(args.device)
             target = target.unsqueeze(1).to(args.device)
             recon = model(input)
             save_image(target, 'Target')
@@ -224,7 +224,7 @@ def run_unet(args):
     reconstructions = defaultdict(list)
     with torch.no_grad():
         for _, _, _, input, _, gt_mean, gt_std, fnames, slices in data_loader:
-            input = input.unsqueeze(1).to(args.device)
+            input = input.to(args.device)
             recons = model(input).squeeze(1).to('cpu')
             for i in range(recons.shape[0]):
                 recons[i] = recons[i] * gt_std[i] + gt_mean[i]

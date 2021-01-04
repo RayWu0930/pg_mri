@@ -156,6 +156,8 @@ class DataTransform:
         # target = transforms.normalize(target, mean, std, eps=1e-11)
         target, gt_mean, gt_std = transforms.normalize_instance(target, eps=1e-11)
         target = target.clamp(-6, 6)
+        if fname == 'FashionMNIST':
+            zf = torch.stack((zf, torch.zeros_like(zf)), axis=0)
 
         # Need to return kspace and mask information when doing active learning, since we are
         # acquiring frequencies and updating the mask for a data point during an AL loop.
@@ -296,9 +298,9 @@ def create_data_loader(args, partition, shuffle=False, display=False):
 
 def create_fashion_mnist_dataset(args, partition):
     from .fashion_mnist import FashionMNISTData
-    
+
     mask = MaskFunc(args.center_fractions, args.accelerations)
-    
+
     if partition == 'test':
         dataset = FashionMNISTData(root=args.data_path,
                                    transform=DataTransform(mask, args.resolution, use_seed=True),
