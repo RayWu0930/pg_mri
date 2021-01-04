@@ -105,6 +105,3 @@ venv.bak/
 
 # Results
 results/
-
-# Bash files
-*.sh
